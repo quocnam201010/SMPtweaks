@@ -24,6 +24,11 @@ public class TrackCommand implements CommandExecutor {
             return false;
         }
 
+        if (!SMPtweaks.getCfg().getBoolean("enable_commands.track")) {
+            sender.sendMessage(org.bukkit.ChatColor.RED + "This command is disabled.");
+            return true;
+        }
+
         if(args.length == 0) {
             return false;
         }

@@ -480,7 +480,7 @@ public class ConfigCache {
         }
 
         try {
-            potionMeta.setBasePotionData(new PotionData(potionType));
+            potionMeta.setBasePotionType(potionType);
             itemStack.setItemMeta(potionMeta);
         } catch (NullPointerException e) {
             LoggingUtils.warn("Unable to apply potion data " + context);

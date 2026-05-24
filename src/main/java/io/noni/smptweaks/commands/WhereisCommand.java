@@ -13,12 +13,19 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import io.noni.smptweaks.SMPtweaks;
+
 public class WhereisCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (command.getName().equalsIgnoreCase("whereis")) {
+
+            if (!SMPtweaks.getCfg().getBoolean("enable_commands.whereis")) {
+                sender.sendMessage(org.bukkit.ChatColor.RED + "This command is disabled.");
+                return true;
+            }
 
             if(args.length == 0) {
                 return false;

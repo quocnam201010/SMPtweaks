@@ -29,6 +29,7 @@ public final class SMPtweaks extends JavaPlugin {
     private static Map<String, String> translations;
     private static Map<UUID, UUID> playerTrackers = new HashMap<>();
     private static List<UUID> coordinateDisplays = new ArrayList<>();
+    private boolean isPaperServer = false;
 
     /**
      * Plugin startup logic
@@ -43,7 +44,6 @@ public final class SMPtweaks extends JavaPlugin {
         plugin = this;
 
         // Check if optional Paper classes are available
-        boolean isPaperServer = false;
         try {
             Class.forName("com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent");
             Class.forName("com.destroystokyo.paper.event.entity.PhantomPreSpawnEvent");
@@ -68,6 +68,33 @@ public final class SMPtweaks extends JavaPlugin {
         var languageCode = config.getString("language");
         translations = TranslationUtils.loadTranslations(languageCode);
 
+        // Register everything (events, recipes, tasks)
+        registerAll();
+
+        //
+        // Register Commands
+        //
+        getCommand("smptweaks").setExecutor(new SMPtweaksCommand());
+        getCommand("whereis").setExecutor(new WhereisCommand());
+        getCommand("collect").setExecutor(new CollectCommand());
+        getCommand("track").setExecutor(new TrackCommand());
+        getCommand("coords").setExecutor(new CoordsCommand());
+        getCommand("level").setExecutor(new LevelCommand());
+        getCommand("level").setTabCompleter(new LevelTab());
+
+        // Include bStats
+        new Metrics(this, 11736);
+
+        //
+        // Done :)
+        //
+        LoggingUtils.info("Up and running! Startup took " + (System.currentTimeMillis() - startingTime) + "ms");
+    }
+
+    /**
+     * Register events, recipes, placeholders and tasks based on config
+     */
+    private void registerAll() {
         //
         // Register Event Listeners
         //
@@ -153,26 +180,6 @@ public final class SMPtweaks extends JavaPlugin {
         }
 
         //
-        // Register Commands
-        //
-        if(config.getBoolean("enable_commands.whereis")) {
-            getCommand("whereis").setExecutor(new WhereisCommand());
-        }
-        if(config.getBoolean("rewards.enabled")) {
-            getCommand("collect").setExecutor(new CollectCommand());
-        }
-        if(config.getBoolean("enable_commands.track")) {
-            getCommand("track").setExecutor(new TrackCommand());
-        }
-        if(config.getBoolean("enable_commands.coords")) {
-            getCommand("coords").setExecutor(new CoordsCommand());
-        }
-        if(config.getBoolean("enable_commands.level") && config.getBoolean("server_levels.enabled")) {
-            getCommand("level").setExecutor(new LevelCommand());
-            getCommand("level").setTabCompleter(new LevelTab());
-        }
-
-        //
         // Schedule tasks
         //
         if(config.getInt("day_duration_modifier") != 0 || config.getInt("night_duration_modifier") != 0) {
@@ -190,16 +197,59 @@ public final class SMPtweaks extends JavaPlugin {
         if(config.getBoolean("enable_commands.coords")) {
             Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new CoordsDisplayTask(), 0L, 10L);
         }
+    }
 
-        //
-        // Include bStats
-        //
-        new Metrics(this, 11736);
+    /**
+     * Reload the plugin configuration, event listeners, tasks, database, and recipes
+     */
+    public void reloadPlugin() {
+        LoggingUtils.info("Reloading plugin configuration...");
 
-        //
-        // Done :)
-        //
-        LoggingUtils.info("Up and running! Startup took " + (System.currentTimeMillis() - startingTime) + "ms");
+        // 1. Turn daylight cycle back on if it was set
+        if (config != null && config.getInt("day_duration_modifier") != 0) {
+            try {
+                Bukkit.getWorlds().get(0).setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
+            } catch (Exception e) {
+                // Ignore if world is not loaded yet
+            }
+        }
+
+        // 2. Unregister event listeners
+        org.bukkit.event.HandlerList.unregisterAll(this);
+
+        // 3. Cancel all tasks
+        Bukkit.getScheduler().cancelTasks(this);
+
+        // 4. Remove custom recipes
+        if (configCache != null) {
+            for (org.bukkit.inventory.ShapedRecipe recipe : configCache.getShapedRecipes()) {
+                Bukkit.removeRecipe(recipe.getKey());
+            }
+            for (org.bukkit.inventory.ShapelessRecipe recipe : configCache.getShapelessRecipes()) {
+                Bukkit.removeRecipe(recipe.getKey());
+            }
+        }
+
+        // 5. Close database manager
+        if (databaseManager != null && databaseManager.getHikariDataSource() != null) {
+            databaseManager.getHikariDataSource().close();
+        }
+
+        // 6. Reload config from file system
+        reloadConfig();
+        config = getConfig();
+
+        // 7. Re-initialize database, config cache, translations
+        databaseManager = new DatabaseManager();
+        configCache = new ConfigCache();
+
+        var languageCode = config.getString("language");
+        translations = TranslationUtils.loadTranslations(languageCode);
+
+        // 8. Re-register events, recipes, tasks
+        registerAll();
+
+        LoggingUtils.info("Plugin reloaded successfully.");
     }
 
     /**

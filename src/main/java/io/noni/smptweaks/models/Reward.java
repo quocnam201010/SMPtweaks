@@ -14,9 +14,7 @@ public record Reward(
     public String getDisplayName() {
         var itemMeta = itemStack.getItemMeta();
 
-        if (itemMeta != null && itemMeta.hasLocalizedName()) {
-            return itemMeta.getLocalizedName();
-        } else if (itemMeta != null && itemMeta.hasDisplayName()) {
+        if (itemMeta != null && itemMeta.hasDisplayName()) {
             return itemMeta.getDisplayName();
         } else {
             return itemStack.getType().name().replace("_", " ").toLowerCase();

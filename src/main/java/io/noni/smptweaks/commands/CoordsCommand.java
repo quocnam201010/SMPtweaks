@@ -25,6 +25,11 @@ public class CoordsCommand implements CommandExecutor {
             return false;
         }
 
+        if (!SMPtweaks.getCfg().getBoolean("enable_commands.coords")) {
+            sender.sendMessage(org.bukkit.ChatColor.RED + "This command is disabled.");
+            return true;
+        }
+
         if (args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("toggle"))) {
             toggleCoordinatesDisplay(player);
         } else if (args.length == 1 && args[0].equalsIgnoreCase("on")) {

@@ -13,6 +13,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 
+import io.noni.smptweaks.SMPtweaks;
+
+
 public class LevelCommand implements CommandExecutor {
 
     @Override
@@ -20,6 +23,11 @@ public class LevelCommand implements CommandExecutor {
 
         if (!command.getName().equalsIgnoreCase("level") || !(sender instanceof Player)) {
             return false;
+        }
+
+        if (!SMPtweaks.getCfg().getBoolean("enable_commands.level") || !SMPtweaks.getCfg().getBoolean("server_levels.enabled")) {
+            sender.sendMessage(ChatColor.RED + "This command is disabled.");
+            return true;
         }
 
         var player = (Player) sender;

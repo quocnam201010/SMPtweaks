@@ -14,15 +14,25 @@ public class ProjectileLaunch implements Listener {
             return;
         }
 
-        PotionEffectType potionEffectType = arrow.getBasePotionData().getType().getEffectType();
+        var potionType = arrow.getBasePotionType();
+        if (potionType == null) {
+            return;
+        }
+
+        var effects = potionType.getPotionEffects();
+        if (effects.isEmpty()) {
+            return;
+        }
+
+        PotionEffectType potionEffectType = effects.get(0).getType();
         if(
                 potionEffectType == PotionEffectType.FIRE_RESISTANCE ||
-                potionEffectType == PotionEffectType.HEAL ||
+                potionEffectType == PotionEffectType.INSTANT_HEALTH ||
                 potionEffectType == PotionEffectType.INVISIBILITY ||
-                potionEffectType == PotionEffectType.JUMP ||
+                potionEffectType == PotionEffectType.JUMP_BOOST ||
                 potionEffectType == PotionEffectType.SLOW_FALLING ||
                 potionEffectType == PotionEffectType.NIGHT_VISION ||
-                potionEffectType == PotionEffectType.INCREASE_DAMAGE ||
+                potionEffectType == PotionEffectType.STRENGTH ||
                 potionEffectType == PotionEffectType.REGENERATION ||
                 potionEffectType == PotionEffectType.SPEED ||
                 potionEffectType == PotionEffectType.WATER_BREATHING

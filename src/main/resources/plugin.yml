@@ -1,12 +1,16 @@
 name: SMPtweaks
 version: ${project.version}
 main: io.noni.smptweaks.SMPtweaks
-api-version: 1.17
+api-version: 1.21
 authors: [ noniDOTio ]
 description: Adds various improvements to make survival minecraft more enjoyable in multiplayer
 website: noni.io
 softdepend: [ PlaceholderAPI ]
 commands:
+  smptweaks:
+    description: Main command for SMPtweaks.
+    usage: /smptweaks <reload>
+    permission: smptweaks.admin
   whereis:
     description: Show a players current location.
     usage: /whereis <player>

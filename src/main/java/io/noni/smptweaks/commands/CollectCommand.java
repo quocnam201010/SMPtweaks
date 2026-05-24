@@ -18,6 +18,11 @@ public class CollectCommand implements CommandExecutor {
             return false;
         }
 
+        if (!SMPtweaks.getCfg().getBoolean("rewards.enabled")) {
+            sender.sendMessage(org.bukkit.ChatColor.RED + "This command is disabled.");
+            return true;
+        }
+
         new RewardCollectorTask(player).runTaskAsynchronously(SMPtweaks.getPlugin());
         return true;
     }

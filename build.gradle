@@ -1,0 +1,63 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '8.3.5'
+}
+
+group = 'io.noni'
+version = '1.0.24'
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url = 'https://oss.sonatype.org/content/groups/public/' }
+    maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+}
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    compileOnly 'me.clip:placeholderapi:2.11.6'
+    compileOnly 'org.jetbrains:annotations:24.1.0'
+    implementation 'org.bstats:bstats-bukkit:3.0.2'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+processResources {
+    def props = [project: project]
+    inputs.properties(['version': project.version])
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    relocate 'org.bstats', 'io.noni.smptweaks'
+    relocate 'com.zaxxer', 'io.noni.smptweaks.libs'
+}
+
+assemble.dependsOn shadowJar
+
+tasks.register('deploy') {
+    dependsOn shadowJar
+    doLast {
+        copy {
+            from shadowJar.archiveFile
+            into file('G:\\Minecraft Servers\\Standalones (DO NOT DELETE)\\bitchsmp\\plugins')
+        }
+    }
+}
+
+build.dependsOn deploy
+

@@ -17,12 +17,12 @@ import java.util.Date;
 
 public class DatabaseManager {
     private final HikariDataSource hikariDataSource;
-    private static final FileConfiguration config = SMPtweaks.getPlugin().getConfig();
     private final String table;
 
     public DatabaseManager() {
         this.hikariDataSource = new HikariDataSource();
         this.hikariDataSource.setMaximumPoolSize(10);
+        FileConfiguration config = SMPtweaks.getCfg();
         this.table = config.getString("mysql.table", "smptweaks_player");
 
         if(config.getBoolean("mysql.enabled")) {
