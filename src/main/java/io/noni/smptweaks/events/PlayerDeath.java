@@ -8,6 +8,7 @@ import io.noni.smptweaks.utils.TranslationUtils;
 import org.bukkit.GameRule;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
@@ -19,9 +20,15 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class PlayerDeath implements Listener {
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDeath(PlayerDeathEvent e) {
         var player = e.getEntity();
+
+        // If the player has been resurrected or saved by another plugin, abort all death penalties
+        if (player.getHealth() > 0.0 || !player.isDead()) {
+            return;
+        }
+
         boolean isPvpDeath = player.getKiller() != null;
 
         //
