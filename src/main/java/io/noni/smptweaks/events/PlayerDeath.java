@@ -24,6 +24,12 @@ public class PlayerDeath implements Listener {
     public void onPlayerDeath(PlayerDeathEvent e) {
         var player = e.getEntity();
 
+        // If the player has the bypass tag (e.g. from MythicMobs custom item), consume it and abort drops
+        if (player.getScoreboardTags().contains("smptweaks_bypass")) {
+            player.removeScoreboardTag("smptweaks_bypass");
+            return;
+        }
+
         // If the player has been resurrected or saved by another plugin, abort all death penalties
         if (player.getHealth() > 0.0 || !player.isDead()) {
             return;
