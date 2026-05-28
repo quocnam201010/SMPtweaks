@@ -59,6 +59,9 @@ public class PlayerDeath implements Listener {
             return;
         }
 
+        boolean lostItems = false;
+        boolean lostXp = false;
+
         //
         // Remove XP from player and drop on ground
         //
@@ -79,6 +82,10 @@ public class PlayerDeath implements Listener {
 
             // Remove XP from player
             ExperienceUtils.setTotalExperience(player, Math.max(0, currentXp - xpToRemove));
+
+            if (xpToRemove > 0 && currentXp > 0) {
+                lostXp = true;
+            }
 
             // Spawn XP orbs on the ground
             if(SMPtweaks.getCfg().getBoolean("remove_xp_on_death.drop_on_ground")) {
@@ -123,6 +130,7 @@ public class PlayerDeath implements Listener {
                 if (inventoryDropOnGround && materialsToAlwaysDrop.contains(itemStack.getType())) {
                     player.getWorld().dropItemNaturally(player.getLocation(), itemStack);
                     player.getInventory().remove(itemStack);
+                    lostItems = true;
                     continue;
                 }
 
@@ -136,16 +144,19 @@ public class PlayerDeath implements Listener {
                         int amountToKeep = itemStackSize - amountToRemove;
                         int amountToDrop = (int) Math.round(amountToRemove * inventoryDropMultiplier);
 
-                        if(amountToKeep < 1) {
-                            player.getInventory().remove(itemStack);
-                        } else {
-                            itemStack.setAmount(amountToKeep);
-                        }
-                        var itemStackToDrop = itemStack.clone();
-                        itemStackToDrop.setAmount(amountToDrop);
+                        if (amountToRemove > 0) {
+                            if(amountToKeep < 1) {
+                                player.getInventory().remove(itemStack);
+                            } else {
+                                itemStack.setAmount(amountToKeep);
+                            }
+                            var itemStackToDrop = itemStack.clone();
+                            itemStackToDrop.setAmount(amountToDrop);
 
-                        if(inventoryDropOnGround && !itemStack.getType().isAir() && amountToDrop > 0) {
-                            player.getWorld().dropItemNaturally(player.getLocation(), itemStackToDrop);
+                            if(inventoryDropOnGround && !itemStack.getType().isAir() && amountToDrop > 0) {
+                                player.getWorld().dropItemNaturally(player.getLocation(), itemStackToDrop);
+                            }
+                            lostItems = true;
                         }
                     }
                 }
@@ -174,6 +185,7 @@ public class PlayerDeath implements Listener {
                 if(equipmentDropOnGround) {
                     player.getWorld().dropItemNaturally(player.getLocation(), helmet);
                 }
+                lostItems = true;
             }
 
             // Chestplate
@@ -182,6 +194,7 @@ public class PlayerDeath implements Listener {
                 if(equipmentDropOnGround) {
                     player.getWorld().dropItemNaturally(player.getLocation(), chestplate);
                 }
+                lostItems = true;
             }
 
             // Leggings
@@ -190,6 +203,7 @@ public class PlayerDeath implements Listener {
                 if(equipmentDropOnGround) {
                     player.getWorld().dropItemNaturally(player.getLocation(), leggings);
                 }
+                lostItems = true;
             }
 
             // Boots
@@ -198,13 +212,20 @@ public class PlayerDeath implements Listener {
                 if(equipmentDropOnGround) {
                     player.getWorld().dropItemNaturally(player.getLocation(), boots);
                 }
+                lostItems = true;
             }
         }
 
         //
         // Send chat message to dead player
         //
-        ChatUtils.negative(player, TranslationUtils.get("playerdeath-lost-xp-and-items"));
+        if (lostItems && lostXp) {
+            ChatUtils.negative(player, TranslationUtils.get("playerdeath-lost-xp-and-items"));
+        } else if (lostItems) {
+            ChatUtils.negative(player, TranslationUtils.get("playerdeath-lost-items"));
+        } else if (lostXp) {
+            ChatUtils.negative(player, TranslationUtils.get("playerdeath-lost-xp"));
+        }
     }
 
     /**
