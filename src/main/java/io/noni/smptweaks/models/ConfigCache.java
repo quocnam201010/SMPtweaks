@@ -24,6 +24,8 @@ import java.util.Map;
 public class ConfigCache {
     private final List<Material> alwaysDropMaterials = new ArrayList<>();
     private final List<Material> neverDropMaterials = new ArrayList<>();
+    private final List<Material> disableNaturalGrowthBlocks = new ArrayList<>();
+    private final List<Material> disableBonemealBlocks = new ArrayList<>();
     private final List<Reward> rewardsList = new ArrayList<>();
     private final List<ShapedRecipe> shapedRecipes = new ArrayList<>();
     private final List<ShapelessRecipe> shapelessRecipes = new ArrayList<>();
@@ -55,6 +57,32 @@ public class ConfigCache {
                 neverDropMaterials.add(materialToAdd);
             } else {
                 LoggingUtils.warn("Invalid material '" + neverDropString + "' in never drop list");
+            }
+        }
+
+        //
+        // Disable Natural Growth Blocks
+        //
+        List<String> naturalGrowthStrings = SMPtweaks.getCfg().getStringList("disable_natural_growth.blocks");
+        for(String str : naturalGrowthStrings) {
+            var material = Material.getMaterial(str.toUpperCase());
+            if(material != null) {
+                disableNaturalGrowthBlocks.add(material);
+            } else {
+                LoggingUtils.warn("Invalid material '" + str + "' in disable_natural_growth.blocks list");
+            }
+        }
+
+        //
+        // Disable Bonemeal Blocks
+        //
+        List<String> bonemealStrings = SMPtweaks.getCfg().getStringList("disable_bonemeal_fertilization.blocks");
+        for(String str : bonemealStrings) {
+            var material = Material.getMaterial(str.toUpperCase());
+            if(material != null) {
+                disableBonemealBlocks.add(material);
+            } else {
+                LoggingUtils.warn("Invalid material '" + str + "' in disable_bonemeal_fertilization.blocks list");
             }
         }
 
@@ -534,6 +562,14 @@ public class ConfigCache {
 
     public List<Material> getNeverDropMaterials() {
         return neverDropMaterials;
+    }
+
+    public List<Material> getDisableNaturalGrowthBlocks() {
+        return disableNaturalGrowthBlocks;
+    }
+
+    public List<Material> getDisableBonemealBlocks() {
+        return disableBonemealBlocks;
     }
 
     public List<Reward> getRewardsList() {

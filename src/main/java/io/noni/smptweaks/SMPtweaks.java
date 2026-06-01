@@ -169,6 +169,10 @@ public final class SMPtweaks extends JavaPlugin {
             config.getBoolean("disable_animal_breeding.enabled")
                     ? new EntityBreed() : null,
 
+            config.getBoolean("disable_natural_growth.enabled") ||
+            config.getBoolean("disable_bonemeal_fertilization.enabled")
+                    ? new BlockGrowthLimit() : null,
+
             config.getBoolean("enable_commands.track")
                     ? new TrackedPlayerLeave() : null
         ).forEach(this::registerEvent);

@@ -77,8 +77,54 @@ disable_animal_breeding:
   warning: '&cYou are not allowed to breed animals!'
 
 #
-# Day-night cycle & weather tweaks
+# Disable natural growth (random tick speed) for certain blocks
 #
+disable_natural_growth:
+  enabled: false
+  blocks:
+    - WHEAT
+    - BEETROOTS
+    - POTATOES
+    - CARROTS
+    - MELON_STEM
+    - PUMPKIN_STEM
+    - COCOA
+    - SWEET_BERRY_BUSH
+    - CACTUS
+    - SUGAR_CANE
+    - OAK_SAPLING
+    - SPRUCE_SAPLING
+    - BIRCH_SAPLING
+    - JUNGLE_SAPLING
+    - ACACIA_SAPLING
+    - DARK_OAK_SAPLING
+    - MANGROVE_PROPAGULE
+    - CHERRY_SAPLING
+
+#
+# Disable bonemeal fertilization for certain blocks
+#
+disable_bonemeal_fertilization:
+  enabled: false
+  blocks:
+    - WHEAT
+    - BEETROOTS
+    - POTATOES
+    - CARROTS
+    - MELON_STEM
+    - PUMPKIN_STEM
+    - COCOA
+    - SWEET_BERRY_BUSH
+    - OAK_SAPLING
+    - SPRUCE_SAPLING
+    - BIRCH_SAPLING
+    - JUNGLE_SAPLING
+    - ACACIA_SAPLING
+    - DARK_OAK_SAPLING
+    - MANGROVE_PROPAGULE
+    - CHERRY_SAPLING
+    - GRASS_BLOCK
+
 disable_night_skip: false # Sleeping will not skip the night
 health_regen_while_in_bed: false # Give regeneration effect to players lying in bed
 day_duration_modifier: 0 # Number of ticks to make days longer or shorter (eg. 2000)
