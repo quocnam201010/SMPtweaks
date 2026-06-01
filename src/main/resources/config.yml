@@ -62,6 +62,21 @@ decrease_item_durability_on_death:
 respawn_health: 20 # The amount of half hearts players have after they respawn
 respawn_food_level: 20 # The amount of half hunger points players have after they respawn
 #
+# Decrease max health permanently on hunger-related deaths
+#
+decrease_max_health_on_hunger_death:
+  enabled: false
+  hunger_threshold: 6 # Hunger level threshold (0 to 20, 6 is 3 hunger bars)
+  max_hearts_lost: 5 # Maximum hearts that can be permanently lost (1 to 9)
+
+#
+# Disable animal breeding
+#
+disable_animal_breeding:
+  enabled: false
+  warning: '&cYou are not allowed to breed animals!'
+
+#
 # Day-night cycle & weather tweaks
 #
 disable_night_skip: false # Sleeping will not skip the night

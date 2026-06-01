@@ -117,10 +117,20 @@ public class DatabaseManager {
                     "`total_xp` INTEGER DEFAULT 0 NOT NULL," +
                     "`xp_display_mode` TINYINT DEFAULT 0 NOT NULL," +
                     "`last_reward_claimed` DATETIME NULL," +
-                    "`last_special_item_drop` DATETIME NULL" +
+                    "`last_special_item_drop` DATETIME NULL," +
+                    "`removed_hearts` SMALLINT DEFAULT 0 NOT NULL" +
                     ")"
             );
             preparedStatement.execute();
+
+            try {
+                var alterStatement = con.prepareStatement(
+                        "ALTER TABLE `" + table + "` ADD COLUMN `removed_hearts` SMALLINT DEFAULT 0 NOT NULL"
+                );
+                alterStatement.execute();
+            } catch (SQLException ignored) {
+                // Column already exists
+            }
             LoggingUtils.info("Successfully set up database");
         } catch (SQLException throwables) {
             LoggingUtils.error("Could not set up database");
@@ -136,7 +146,7 @@ public class DatabaseManager {
     public PlayerMeta getPlayerMeta(Player player) {
         try (var con = this.hikariDataSource.getConnection()) {
             var preparedStatement = con.prepareStatement("" +
-                    "SELECT `level`, `total_xp`, `xp_display_mode`, `last_special_item_drop` " +
+                    "SELECT `level`, `total_xp`, `xp_display_mode`, `last_special_item_drop`, `removed_hearts` " +
                     "FROM `" + table + "` " +
                     "WHERE `uuid` = ? " +
                     "LIMIT 1"
@@ -149,7 +159,8 @@ public class DatabaseManager {
                         resultSet.getInt("level"),
                         resultSet.getInt("total_xp"),
                         resultSet.getInt("xp_display_mode"),
-                        true
+                        true,
+                        resultSet.getInt("removed_hearts")
                 );
             }
         } catch (SQLException throwables) {
@@ -190,8 +201,8 @@ public class DatabaseManager {
 
             if (!playerInDB(player)) {
                 preparedStatement = con.prepareStatement("" +
-                        "INSERT INTO `" + table + "` (`name`, `level`, `total_xp`, `xp_display_mode`, `uuid`) " +
-                        "VALUES(?, ?, ?, ?, ?)"
+                        "INSERT INTO `" + table + "` (`name`, `level`, `total_xp`, `xp_display_mode`, `removed_hearts`, `uuid`) " +
+                        "VALUES(?, ?, ?, ?, ?, ?)"
                 );
             } else {
                 preparedStatement = con.prepareStatement("" +
@@ -200,7 +211,8 @@ public class DatabaseManager {
                         "`name` = ?, " +
                         "`level` = ?, " +
                         "`total_xp` = ?, " +
-                        "`xp_display_mode` = ? " +
+                        "`xp_display_mode` = ?, " +
+                        "`removed_hearts` = ? " +
                         "WHERE `uuid` = ?"
 
                 );
@@ -209,10 +221,27 @@ public class DatabaseManager {
             preparedStatement.setInt(2, playerMeta.getLevel());
             preparedStatement.setInt(3, playerMeta.getTotalXp());
             preparedStatement.setInt(4, playerMeta.getXpDisplayMode());
-            preparedStatement.setString(5, playerMeta.getPlayer().getUniqueId().toString());
+            preparedStatement.setInt(5, playerMeta.getRemovedHearts());
+            preparedStatement.setString(6, playerMeta.getPlayer().getUniqueId().toString());
             preparedStatement.execute();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        }
+    }
+
+    /**
+     * Reset removed hearts for a player in the database by name (handles both online and offline players).
+     */
+    public boolean resetRemovedHearts(String targetName) {
+        try (var con = this.hikariDataSource.getConnection()) {
+            var stmt = con.prepareStatement(
+                "UPDATE `" + table + "` SET `removed_hearts` = 0 WHERE `name` = ?"
+            );
+            stmt.setString(1, targetName);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

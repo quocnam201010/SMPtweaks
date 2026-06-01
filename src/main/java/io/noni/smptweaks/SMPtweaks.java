@@ -74,7 +74,9 @@ public final class SMPtweaks extends JavaPlugin {
         //
         // Register Commands
         //
-        getCommand("smptweaks").setExecutor(new SMPtweaksCommand());
+        var smpCommand = new SMPtweaksCommand();
+        getCommand("smptweaks").setExecutor(smpCommand);
+        getCommand("smptweaks").setTabCompleter(smpCommand);
         getCommand("whereis").setExecutor(new WhereisCommand());
         getCommand("collect").setExecutor(new CollectCommand());
         getCommand("track").setExecutor(new TrackCommand());
@@ -111,11 +113,13 @@ public final class SMPtweaks extends JavaPlugin {
             config.getBoolean("remove_xp_on_death.enabled") ||
             config.getBoolean("remove_inventory_on_death.enabled") ||
             config.getBoolean("remove_equipment_on_death.enabled") ||
-            config.getBoolean("decrease_item_durability_on_death.enabled")
+            config.getBoolean("decrease_item_durability_on_death.enabled") ||
+            config.getBoolean("decrease_max_health_on_hunger_death.enabled")
                     ? new PlayerDeath() : null,
 
             config.getInt("respawn_health") != 20 ||
-            config.getInt("respawn_food_level") != 20
+            config.getInt("respawn_food_level") != 20 ||
+            config.getBoolean("decrease_max_health_on_hunger_death.enabled")
                     ? new PlayerRespawn() : null,
 
             config.getDouble("xp_multiplier") != 1
@@ -134,7 +138,8 @@ public final class SMPtweaks extends JavaPlugin {
                     ? new AnvilInventoryClickEvent() : null,
 
             config.getBoolean("server_levels.enabled") ||
-            config.getBoolean("rewards.enabled")
+            config.getBoolean("rewards.enabled") ||
+            config.getBoolean("decrease_max_health_on_hunger_death.enabled")
                     ? new PlayerJoin() : null,
 
             config.getBoolean("spawn_rates.enabled")
@@ -157,8 +162,12 @@ public final class SMPtweaks extends JavaPlugin {
                     ? new ProjectileLaunch() : null,
 
             config.getBoolean("server_levels.enabled") ||
-            config.getBoolean("rewards.enabled")
+            config.getBoolean("rewards.enabled") ||
+            config.getBoolean("decrease_max_health_on_hunger_death.enabled")
                     ? new PlayerLeave() : null,
+
+            config.getBoolean("disable_animal_breeding.enabled")
+                    ? new EntityBreed() : null,
 
             config.getBoolean("enable_commands.track")
                     ? new TrackedPlayerLeave() : null

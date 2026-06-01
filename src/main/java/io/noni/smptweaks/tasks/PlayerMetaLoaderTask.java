@@ -19,6 +19,12 @@ public class PlayerMetaLoaderTask extends BukkitRunnable {
         if(playerMeta != null) {
             LoggingUtils.info("Loading meta data for " + player.getName() + " with UUID " + player.getUniqueId());
             playerMeta.pushToPDC();
+            int removedHearts = playerMeta.getRemovedHearts();
+            org.bukkit.Bukkit.getScheduler().runTask(SMPtweaks.getPlugin(), () -> {
+                if (player.isOnline()) {
+                    io.noni.smptweaks.models.PlayerMeta.applyMaxHealthModifier(player, removedHearts);
+                }
+            });
         } else {
             LoggingUtils.info("Unable to find meta data for " + player.getName() + " with UUID " + player.getUniqueId());
         }

@@ -217,6 +217,30 @@ public class PlayerDeath implements Listener {
         }
 
         //
+        // Decrease max health permanently on hunger-related deaths
+        //
+        if (SMPtweaks.getCfg().getBoolean("decrease_max_health_on_hunger_death.enabled")) {
+            var cause = player.getLastDamageCause() != null ? player.getLastDamageCause().getCause() : null;
+            boolean starvationDeath = (cause == org.bukkit.event.entity.EntityDamageEvent.DamageCause.STARVATION);
+            int threshold = SMPtweaks.getCfg().getInt("decrease_max_health_on_hunger_death.hunger_threshold");
+            int hunger = player.getFoodLevel();
+
+            if (starvationDeath || hunger <= threshold) {
+                var playerMeta = new io.noni.smptweaks.models.PlayerMeta(player);
+                int currentRemoved = playerMeta.getRemovedHearts();
+                int maxHeartsLost = SMPtweaks.getCfg().getInt("decrease_max_health_on_hunger_death.max_hearts_lost", 5);
+                maxHeartsLost = Math.max(1, Math.min(9, maxHeartsLost));
+
+                if (currentRemoved < maxHeartsLost) {
+                    playerMeta.setRemovedHearts(currentRemoved + 1);
+                    playerMeta.pushToPDC();
+                    new io.noni.smptweaks.tasks.PlayerMetaStorerTask(player).runTaskAsynchronously(SMPtweaks.getPlugin());
+                    ChatUtils.negative(player, TranslationUtils.get("playerdeath-lost-heart"));
+                }
+            }
+        }
+
+        //
         // Send chat message to dead player
         //
         if (lostItems && lostXp) {

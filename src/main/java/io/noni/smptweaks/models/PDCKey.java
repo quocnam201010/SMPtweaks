@@ -9,12 +9,14 @@ public class PDCKey<T> {
     public static final PDCKey<Integer> TOTAL_XP;
     public static final PDCKey<Integer> XP_DISPLAY_MODE;
     public static final PDCKey<Integer> SPECIAL_DROP_AVAILABLE;
+    public static final PDCKey<Integer> REMOVED_HEARTS;
 
     static {
         LEVEL = new PDCKey("level", PersistentDataType.INTEGER);
         TOTAL_XP = new PDCKey("total_xp", PersistentDataType.INTEGER);
         XP_DISPLAY_MODE = new PDCKey("xp_display_mode", PersistentDataType.INTEGER);
         SPECIAL_DROP_AVAILABLE = new PDCKey("special_drop_available", PersistentDataType.INTEGER);
+        REMOVED_HEARTS = new PDCKey("removed_hearts", PersistentDataType.INTEGER);
     }
 
     public final NamespacedKey key;

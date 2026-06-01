@@ -13,7 +13,12 @@ public class PlayerHealthModifierTask extends BukkitRunnable {
 
     @Override
     public void run() {
+        var playerMeta = new io.noni.smptweaks.models.PlayerMeta(player);
+        io.noni.smptweaks.models.PlayerMeta.applyMaxHealthModifier(player, playerMeta.getRemovedHearts());
+
         var health = SMPtweaks.getCfg().getInt("respawn_health");
-        player.setHealth(health);
+        var attribute = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+        double maxHealth = attribute != null ? attribute.getValue() : 20.0;
+        player.setHealth(Math.min((double) health, maxHealth));
     }
 }
