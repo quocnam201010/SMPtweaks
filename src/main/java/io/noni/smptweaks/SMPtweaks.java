@@ -29,12 +29,7 @@ public final class SMPtweaks extends JavaPlugin {
     private static Map<String, String> translations;
     private static Map<UUID, UUID> playerTrackers = new HashMap<>();
     private static List<UUID> coordinateDisplays = new ArrayList<>();
-    private static io.noni.smptweaks.recipes.RecipeManager recipeManager;
     private boolean isPaperServer = false;
-
-    public static io.noni.smptweaks.recipes.RecipeManager getRecipeManager() {
-        return recipeManager;
-    }
 
     /**
      * Plugin startup logic
@@ -73,9 +68,6 @@ public final class SMPtweaks extends JavaPlugin {
         var languageCode = config.getString("language");
         translations = TranslationUtils.loadTranslations(languageCode);
 
-        // Initialize recipe manager
-        recipeManager = new io.noni.smptweaks.recipes.RecipeManager();
-
         // Register everything (events, recipes, tasks)
         registerAll();
 
@@ -91,12 +83,6 @@ public final class SMPtweaks extends JavaPlugin {
         getCommand("coords").setExecutor(new CoordsCommand());
         getCommand("level").setExecutor(new LevelCommand());
         getCommand("level").setTabCompleter(new LevelTab());
-
-        if (config.getBoolean("enable_commands.recipes", true)) {
-            var recipesCmd = new io.noni.smptweaks.recipes.RecipesCommand(recipeManager);
-            getCommand("recipes").setExecutor(recipesCmd);
-            getCommand("recipes").setTabCompleter(recipesCmd);
-        }
 
         // Include bStats
         new Metrics(this, 11736);
@@ -188,10 +174,7 @@ public final class SMPtweaks extends JavaPlugin {
                     ? new BlockGrowthLimit() : null,
 
             config.getBoolean("enable_commands.track")
-                    ? new TrackedPlayerLeave() : null,
-
-            config.getBoolean("recipe_manager.enabled", true)
-                    ? new io.noni.smptweaks.recipes.RecipeEvents(recipeManager) : null
+                    ? new TrackedPlayerLeave() : null
         ).forEach(this::registerEvent);
 
         //
@@ -269,10 +252,9 @@ public final class SMPtweaks extends JavaPlugin {
         reloadConfig();
         config = getConfig();
 
-        // 7. Re-initialize database, config cache, translations, recipe manager
+        // 7. Re-initialize database, config cache, translations
         databaseManager = new DatabaseManager();
         configCache = new ConfigCache();
-        recipeManager = new io.noni.smptweaks.recipes.RecipeManager();
 
         var languageCode = config.getString("language");
         translations = TranslationUtils.loadTranslations(languageCode);

@@ -200,13 +200,6 @@ enable_commands:
   whereis: false
   track: false
   coords: false
-  recipes: true
-
-#
-# Recipe Manager Settings
-#
-recipe_manager:
-  enabled: true
 #
 # Login Rewards
 #
