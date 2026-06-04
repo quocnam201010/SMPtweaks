@@ -174,7 +174,10 @@ public final class SMPtweaks extends JavaPlugin {
                     ? new BlockGrowthLimit() : null,
 
             config.getBoolean("enable_commands.track")
-                    ? new TrackedPlayerLeave() : null
+                    ? new TrackedPlayerLeave() : null,
+
+            config.getBoolean("fun_fishing.enabled")
+                    ? new PlayerFish() : null
         ).forEach(this::registerEvent);
 
         //

@@ -330,3 +330,14 @@ server_levels:
       3277200,
       4000000
   ]
+
+#
+# Fun Fishing
+# When a player fishes, instead of getting an item, they get a living fish.
+# The fish is hooked onto the bobber when pulled, landing near the player.
+#
+fun_fishing:
+  enabled: false
+  pufferfish_chance: 10.0
+  velocity_multiplier: 1.0
+
