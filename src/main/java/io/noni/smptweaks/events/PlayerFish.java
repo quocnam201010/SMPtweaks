@@ -10,6 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.util.Vector;
 
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -92,6 +94,9 @@ public class PlayerFish implements Listener {
         // Launch the fish up at 60 degrees initially
         livingFish.setVelocity(initialVelocity);
 
+        // Add 3-second fall damage immunity metadata
+        livingFish.setMetadata("fun_fishing_immunity", new FixedMetadataValue(SMPtweaks.getPlugin(), System.currentTimeMillis() + 3000L));
+
         // Schedule homing task to guide the fish to the player
         new BukkitRunnable() {
             private int ticks = 0;
@@ -141,5 +146,23 @@ public class PlayerFish implements Listener {
                 }
             }
         }.runTaskTimer(SMPtweaks.getPlugin(), 1L, 1L);
+    }
+
+    @EventHandler
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+            Entity entity = event.getEntity();
+            if (entity.hasMetadata("fun_fishing_immunity")) {
+                java.util.List<org.bukkit.metadata.MetadataValue> values = entity.getMetadata("fun_fishing_immunity");
+                if (!values.isEmpty()) {
+                    long expiry = values.get(0).asLong();
+                    if (System.currentTimeMillis() < expiry) {
+                        event.setCancelled(true);
+                    } else {
+                        entity.removeMetadata("fun_fishing_immunity", SMPtweaks.getPlugin());
+                    }
+                }
+            }
+        }
     }
 }
