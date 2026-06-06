@@ -338,6 +338,10 @@ server_levels:
 #
 fun_fishing:
   enabled: false
-  pufferfish_chance: 10.0
   velocity_multiplier: 1.0
+  mobs:
+    - salmon 0.3
+    - cod 0.3
+    - pufferfish 0.2
+    - tropical_fish 0.2
 

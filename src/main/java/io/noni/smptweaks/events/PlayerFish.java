@@ -65,31 +65,66 @@ public class PlayerFish implements Listener {
             return;
         }
 
-        double pufferfishChance = SMPtweaks.getCfg().getDouble("fun_fishing.pufferfish_chance", 10.0);
-        double rand = ThreadLocalRandom.current().nextDouble(100.0);
+        java.util.List<String> mobConfigLines = SMPtweaks.getCfg().getStringList("fun_fishing.mobs");
+        if (mobConfigLines == null || mobConfigLines.isEmpty()) {
+            mobConfigLines = java.util.List.of(
+                "salmon 0.3",
+                "cod 0.3",
+                "pufferfish 0.2",
+                "tropical_fish 0.2"
+            );
+        }
 
-        final Entity livingFish;
-        if (rand < pufferfishChance) {
-            livingFish = world.spawn(spawnLoc, PufferFish.class);
-        } else {
-            int fishSelection = ThreadLocalRandom.current().nextInt(3);
-            if (fishSelection == 0) {
-                livingFish = world.spawn(spawnLoc, Cod.class);
-            } else if (fishSelection == 1) {
-                livingFish = world.spawn(spawnLoc, Salmon.class);
-            } else {
-                TropicalFish tropicalFish = world.spawn(spawnLoc, TropicalFish.class);
-                
-                // Randomize tropical fish colors and patterns to make it unique
-                var patterns = TropicalFish.Pattern.values();
-                var dyeColors = DyeColor.values();
-                tropicalFish.setPattern(patterns[ThreadLocalRandom.current().nextInt(patterns.length)]);
-                tropicalFish.setPatternColor(dyeColors[ThreadLocalRandom.current().nextInt(dyeColors.length)]);
-                tropicalFish.setBodyColor(dyeColors[ThreadLocalRandom.current().nextInt(dyeColors.length)]);
-                
-                livingFish = tropicalFish;
+        java.util.List<ConfiguredMob> mobs = new java.util.ArrayList<>();
+        double totalChance = 0;
+        for (String mobLine : mobConfigLines) {
+            try {
+                mobLine = mobLine.trim();
+                int lastSpaceIdx = mobLine.lastIndexOf(' ');
+                if (lastSpaceIdx == -1) continue;
+
+                String mobDeclaration = mobLine.substring(0, lastSpaceIdx).trim();
+                String chanceStr = mobLine.substring(lastSpaceIdx + 1).trim();
+                double chance = Double.parseDouble(chanceStr);
+
+                String entityId;
+                String nbt;
+                int braceIdx = mobDeclaration.indexOf('{');
+                if (braceIdx == -1) {
+                    entityId = mobDeclaration;
+                    nbt = "";
+                } else {
+                    entityId = mobDeclaration.substring(0, braceIdx);
+                    nbt = mobDeclaration.substring(braceIdx);
+                }
+
+                if (chance > 0) {
+                    mobs.add(new ConfiguredMob(entityId, nbt, chance));
+                    totalChance += chance;
+                }
+            } catch (Exception e) {
+                // Ignore malformed lines
             }
         }
+
+        if (mobs.isEmpty()) {
+            mobs.add(new ConfiguredMob("cod", "", 1.0));
+            totalChance = 1.0;
+        }
+
+        // Weighted random selection
+        double rand = ThreadLocalRandom.current().nextDouble(totalChance);
+        ConfiguredMob selected = mobs.get(0);
+        double accumulated = 0;
+        for (ConfiguredMob mob : mobs) {
+            accumulated += mob.chance;
+            if (rand < accumulated) {
+                selected = mob;
+                break;
+            }
+        }
+
+        final Entity livingFish = spawnConfiguredMob(world, spawnLoc, selected.entityId, selected.nbt);
 
         // Launch the fish up at 60 degrees initially
         livingFish.setVelocity(initialVelocity);
@@ -163,6 +198,57 @@ public class PlayerFish implements Listener {
                     }
                 }
             }
+        }
+    }
+
+    private Entity spawnConfiguredMob(World world, Location loc, String entityId, String nbt) {
+        // Special case: if tropical_fish and no NBT, randomize it
+        if (entityId.equalsIgnoreCase("tropical_fish") && nbt.isEmpty()) {
+            TropicalFish tropicalFish = world.spawn(loc, TropicalFish.class);
+            var patterns = TropicalFish.Pattern.values();
+            var dyeColors = DyeColor.values();
+            tropicalFish.setPattern(patterns[ThreadLocalRandom.current().nextInt(patterns.length)]);
+            tropicalFish.setPatternColor(dyeColors[ThreadLocalRandom.current().nextInt(dyeColors.length)]);
+            tropicalFish.setBodyColor(dyeColors[ThreadLocalRandom.current().nextInt(dyeColors.length)]);
+            return tropicalFish;
+        }
+
+        // For all other cases (or if tropical_fish has NBT), use summon command to support NBT
+        String nbtWithTag;
+        if (nbt.isEmpty()) {
+            nbtWithTag = "{Tags:[\"fun_fishing_temp_tag\"]}";
+        } else {
+            nbtWithTag = "{" + "Tags:[\"fun_fishing_temp_tag\"]," + nbt.substring(1);
+        }
+
+        double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
+
+        String command = String.format(java.util.Locale.US, "summon %s %.3f %.3f %.3f %s", entityId.toLowerCase(), x, y, z, nbtWithTag);
+        org.bukkit.Bukkit.dispatchCommand(org.bukkit.Bukkit.getConsoleSender(), command);
+
+        // Find the summoned entity in a 2.0 block radius
+        for (Entity entity : world.getNearbyEntities(loc, 2.0, 2.0, 2.0)) {
+            if (entity.getScoreboardTags().contains("fun_fishing_temp_tag")) {
+                entity.removeScoreboardTag("fun_fishing_temp_tag");
+                return entity;
+            }
+        }
+
+        // Fallback: spawn a Cod
+        return world.spawn(loc, Cod.class);
+    }
+
+    private static class ConfiguredMob {
+        final String entityId;
+        final String nbt;
+        final double chance;
+
+        ConfiguredMob(String entityId, String nbt, double chance) {
+            this.entityId = entityId;
+            this.nbt = nbt;
+            this.chance = chance;
         }
     }
 }
