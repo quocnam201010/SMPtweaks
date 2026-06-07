@@ -77,6 +77,15 @@ disable_animal_breeding:
   warning: '&cYou are not allowed to breed animals!'
 
 #
+# Disable villager and/or wandering trader trading
+#
+disable_trading:
+  enabled: false
+  villagers: true
+  wandering_traders: true
+  warning: '&cTrading is disabled!'
+
+#
 # Disable natural growth (random tick speed) for certain blocks
 #
 disable_natural_growth:

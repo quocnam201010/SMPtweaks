@@ -187,6 +187,9 @@ public final class SMPtweaks extends JavaPlugin {
             config.getBoolean("fun_fishing.enabled")
                     ? new PlayerFish() : null,
 
+            config.getBoolean("disable_trading.enabled")
+                    ? new MerchantTrading() : null,
+
             new RecipeMenuListener()
         ).forEach(this::registerEvent);
 
