@@ -3,6 +3,7 @@ package io.noni.smptweaks;
 import io.noni.smptweaks.commands.*;
 import io.noni.smptweaks.database.DatabaseManager;
 import io.noni.smptweaks.events.*;
+import io.noni.smptweaks.managers.RecipeManager;
 import io.noni.smptweaks.models.ConfigCache;
 import io.noni.smptweaks.tasks.*;
 import io.noni.smptweaks.utils.LoggingUtils;
@@ -26,6 +27,7 @@ public final class SMPtweaks extends JavaPlugin {
     private static DatabaseManager databaseManager;
     private static FileConfiguration config;
     private static ConfigCache configCache;
+    private static RecipeManager recipeManager;
     private static Map<String, String> translations;
     private static Map<UUID, UUID> playerTrackers = new HashMap<>();
     private static List<UUID> coordinateDisplays = new ArrayList<>();
@@ -60,6 +62,8 @@ public final class SMPtweaks extends JavaPlugin {
         // Static reference to config
         config = getConfig();
         configCache = new ConfigCache();
+        recipeManager = new RecipeManager(this);
+        Bukkit.getScheduler().runTaskLater(this, () -> recipeManager.initializeRecipes(), 1L);
 
         // Static reference to Hikari
         databaseManager = new DatabaseManager();
@@ -83,6 +87,10 @@ public final class SMPtweaks extends JavaPlugin {
         getCommand("coords").setExecutor(new CoordsCommand());
         getCommand("level").setExecutor(new LevelCommand());
         getCommand("level").setTabCompleter(new LevelTab());
+
+        var recipesCommand = new RecipesCommand();
+        getCommand("recipes").setExecutor(recipesCommand);
+        getCommand("recipes").setTabCompleter(recipesCommand);
 
         // Include bStats
         new Metrics(this, 11736);
@@ -177,7 +185,9 @@ public final class SMPtweaks extends JavaPlugin {
                     ? new TrackedPlayerLeave() : null,
 
             config.getBoolean("fun_fishing.enabled")
-                    ? new PlayerFish() : null
+                    ? new PlayerFish() : null,
+
+            new RecipeMenuListener()
         ).forEach(this::registerEvent);
 
         //
@@ -215,11 +225,13 @@ public final class SMPtweaks extends JavaPlugin {
         }
     }
 
-    /**
-     * Reload the plugin configuration, event listeners, tasks, database, and recipes
-     */
     public void reloadPlugin() {
         LoggingUtils.info("Reloading plugin configuration...");
+
+        // Restore all disabled recipes before reloading
+        if (recipeManager != null) {
+            recipeManager.restoreAllRecipes();
+        }
 
         // 1. Turn daylight cycle back on if it was set
         if (config != null && config.getInt("day_duration_modifier") != 0) {
@@ -258,6 +270,8 @@ public final class SMPtweaks extends JavaPlugin {
         // 7. Re-initialize database, config cache, translations
         databaseManager = new DatabaseManager();
         configCache = new ConfigCache();
+        recipeManager = new RecipeManager(this);
+        Bukkit.getScheduler().runTaskLater(this, () -> recipeManager.initializeRecipes(), 1L);
 
         var languageCode = config.getString("language");
         translations = TranslationUtils.loadTranslations(languageCode);
@@ -353,6 +367,14 @@ public final class SMPtweaks extends JavaPlugin {
      */
     public static ConfigCache getConfigCache() {
         return configCache;
+    }
+
+    /**
+     * Get reference to recipe manager
+     * @return RecipeManager
+     */
+    public static RecipeManager getRecipeManager() {
+        return recipeManager;
     }
 
     /**

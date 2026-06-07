@@ -28,3 +28,8 @@ commands:
   coords:
     description: Display your current coordinates or share them with others.
     usage: /coords -or- /coords <on|off> -or- /coords <share|copy>
+  recipes:
+    description: Manage enabled and disabled recipes.
+    usage: /recipes -or- /recipes search <query>
+    permission: smptweaks.admin
+
