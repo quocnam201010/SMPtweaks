@@ -51,6 +51,11 @@ remove_inventory_on_death:
 remove_equipment_on_death:
   enabled: false
   chance_per_slot: 0.3 # Chance that an equipment inventory slot is affected (1.0 to affect every slot)
+  include_helmet: true # Whether helmet should be considered equipment
+  include_chestplate: true # Whether chestplate should be considered equipment
+  include_leggings: true # Whether leggings should be considered equipment
+  include_boots: true # Whether boots should be considered equipment
+  include_offhand: true # Whether offhand slot should be considered equipment
   drop_on_ground: true # Whether the equipment should only be removed or also drop on the ground
   disable_for_pvp_deaths: false # Skip removing equipment logic for pvp deaths
   disable_for_non_pvp_deaths: false # Skip removing equipment logic for all death causes except pvp

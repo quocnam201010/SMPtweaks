@@ -174,45 +174,64 @@ public class PlayerDeath implements Listener {
             var equipmentChancePerSlot = SMPtweaks.getCfg().getDouble("remove_equipment_on_death.chance_per_slot");
             var equipmentDropOnGround = SMPtweaks.getCfg().getBoolean("remove_equipment_on_death.drop_on_ground");
 
-            ItemStack helmet = player.getInventory().getHelmet();
-            ItemStack chestplate = player.getInventory().getChestplate();
-            ItemStack leggings = player.getInventory().getLeggings();
-            ItemStack boots = player.getInventory().getBoots();
-
             // Helmet
-            if(helmet != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
-                player.getInventory().setHelmet(null);
-                if(equipmentDropOnGround) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), helmet);
+            if(SMPtweaks.getCfg().getBoolean("remove_equipment_on_death.include_helmet", true)) {
+                ItemStack helmet = player.getInventory().getHelmet();
+                if(helmet != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
+                    player.getInventory().setHelmet(null);
+                    if(equipmentDropOnGround) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), helmet);
+                    }
+                    lostItems = true;
                 }
-                lostItems = true;
             }
 
             // Chestplate
-            if(chestplate != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
-                player.getInventory().setChestplate(null);
-                if(equipmentDropOnGround) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), chestplate);
+            if(SMPtweaks.getCfg().getBoolean("remove_equipment_on_death.include_chestplate", true)) {
+                ItemStack chestplate = player.getInventory().getChestplate();
+                if(chestplate != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
+                    player.getInventory().setChestplate(null);
+                    if(equipmentDropOnGround) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), chestplate);
+                    }
+                    lostItems = true;
                 }
-                lostItems = true;
             }
 
             // Leggings
-            if(leggings != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
-                player.getInventory().setLeggings(null);
-                if(equipmentDropOnGround) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), leggings);
+            if(SMPtweaks.getCfg().getBoolean("remove_equipment_on_death.include_leggings", true)) {
+                ItemStack leggings = player.getInventory().getLeggings();
+                if(leggings != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
+                    player.getInventory().setLeggings(null);
+                    if(equipmentDropOnGround) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), leggings);
+                    }
+                    lostItems = true;
                 }
-                lostItems = true;
             }
 
             // Boots
-            if(boots != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
-                player.getInventory().setBoots(null);
-                if(equipmentDropOnGround) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), boots);
+            if(SMPtweaks.getCfg().getBoolean("remove_equipment_on_death.include_boots", true)) {
+                ItemStack boots = player.getInventory().getBoots();
+                if(boots != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
+                    player.getInventory().setBoots(null);
+                    if(equipmentDropOnGround) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), boots);
+                    }
+                    lostItems = true;
                 }
-                lostItems = true;
+            }
+
+            // Offhand
+            if(SMPtweaks.getCfg().getBoolean("remove_equipment_on_death.include_offhand", true)) {
+                ItemStack offhand = player.getInventory().getItemInOffHand();
+                if(offhand != null && offhand.getType() != Material.AIR && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
+                    player.getInventory().setItemInOffHand(null);
+                    if(equipmentDropOnGround) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), offhand);
+                    }
+                    lostItems = true;
+                }
             }
         }
 
