@@ -12,6 +12,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.Material;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantInventory;
 
@@ -21,9 +24,20 @@ public class MerchantTrading implements Listener {
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Entity entity = event.getRightClicked();
         if (isTradingDisabledFor(entity)) {
+            Player player = event.getPlayer();
+            ItemStack item = null;
+            if (event.getHand() == EquipmentSlot.HAND) {
+                item = player.getInventory().getItemInMainHand();
+            } else if (event.getHand() == EquipmentSlot.OFF_HAND) {
+                item = player.getInventory().getItemInOffHand();
+            }
+            
+            if (item != null && item.getType() == Material.NAME_TAG) {
+                return;
+            }
+
             event.setCancelled(true);
             
-            Player player = event.getPlayer();
             String warning = SMPtweaks.getCfg().getString("disable_trading.warning");
             if (warning != null && !warning.isEmpty()) {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', warning));
