@@ -184,7 +184,10 @@ public final class SMPtweaks extends JavaPlugin {
             config.getBoolean("enable_commands.track")
                     ? new TrackedPlayerLeave() : null,
 
-            config.getBoolean("fun_fishing.enabled")
+            config.getBoolean("fun_fishing.enabled") ||
+            config.getBoolean("lava_fishing.enabled") ||
+            config.getConfigurationSection("fun_fishing.dimensions") != null ||
+            config.getConfigurationSection("lava_fishing.dimensions") != null
                     ? new PlayerFish() : null,
 
             config.getBoolean("disable_trading.enabled")

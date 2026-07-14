@@ -358,4 +358,25 @@ fun_fishing:
     - cod 0.3
     - pufferfish 0.2
     - tropical_fish 0.2
+  # Per-dimension overrides. Unlisted dimensions fall back to the global settings above.
+  # dimensions:
+  #   world_nether:
+  #     enabled: true
+  #     velocity_multiplier: 1.0
+  #     mobs:
+  #       - magma_cube 0.4
+  #       - strider 0.4
+  #       - ghast 0.2
+
+#
+# Lava Fishing
+# Allows players to fish in lava.
+#
+lava_fishing:
+  enabled: false
+  # Per-dimension overrides. Unlisted dimensions fall back to the global enabled toggle above.
+  # dimensions:
+  #   world_nether:
+  #     enabled: true
+
 
