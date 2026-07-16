@@ -195,6 +195,9 @@ public final class SMPtweaks extends JavaPlugin {
             config.getBoolean("disable_trading.enabled")
                     ? new MerchantTrading() : null,
 
+            config.getBoolean("protect_items.enabled")
+                    ? new ItemDamage() : null,
+
             new RecipeMenuListener()
         ).forEach(this::registerEvent);
 

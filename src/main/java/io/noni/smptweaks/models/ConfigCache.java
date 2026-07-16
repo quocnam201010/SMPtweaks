@@ -32,7 +32,28 @@ public class ConfigCache {
     private final EnumMap<EntityType, Float> entitySpawnRates = new EnumMap<>(EntityType.class);
     private final EnumMap<EntityType, CustomDropSet> entityCustomDrops = new EnumMap<>(EntityType.class);
 
+    private boolean protectItemsEnabled;
+    private boolean protectItemsLightning;
+    private boolean protectItemsFire;
+    private boolean protectItemsSoulFire;
+    private boolean protectItemsLava;
+    private boolean protectItemsCactus;
+    private boolean protectItemsExplosion;
+    private boolean protectItemsVoid;
+
     public ConfigCache() {
+        //
+        // Protect Items
+        //
+        protectItemsEnabled = SMPtweaks.getCfg().getBoolean("protect_items.enabled", false);
+        protectItemsLightning = SMPtweaks.getCfg().getBoolean("protect_items.lightning", false);
+        protectItemsFire = SMPtweaks.getCfg().getBoolean("protect_items.fire", false);
+        protectItemsSoulFire = SMPtweaks.getCfg().getBoolean("protect_items.soul_fire", false);
+        protectItemsLava = SMPtweaks.getCfg().getBoolean("protect_items.lava", false);
+        protectItemsCactus = SMPtweaks.getCfg().getBoolean("protect_items.cactus", false);
+        protectItemsExplosion = SMPtweaks.getCfg().getBoolean("protect_items.explosion", false);
+        protectItemsVoid = SMPtweaks.getCfg().getBoolean("protect_items.void", false);
+
         //
         // Item Dropping
         //
@@ -590,5 +611,37 @@ public class ConfigCache {
 
     public Map<EntityType, CustomDropSet> getEntityCustomDrops() {
         return entityCustomDrops;
+    }
+
+    public boolean isProtectItemsEnabled() {
+        return protectItemsEnabled;
+    }
+
+    public boolean isProtectItemsLightning() {
+        return protectItemsLightning;
+    }
+
+    public boolean isProtectItemsFire() {
+        return protectItemsFire;
+    }
+
+    public boolean isProtectItemsSoulFire() {
+        return protectItemsSoulFire;
+    }
+
+    public boolean isProtectItemsLava() {
+        return protectItemsLava;
+    }
+
+    public boolean isProtectItemsCactus() {
+        return protectItemsCactus;
+    }
+
+    public boolean isProtectItemsExplosion() {
+        return protectItemsExplosion;
+    }
+
+    public boolean isProtectItemsVoid() {
+        return protectItemsVoid;
     }
 }

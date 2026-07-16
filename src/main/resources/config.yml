@@ -64,6 +64,20 @@ decrease_item_durability_on_death:
   multiplier: 0.8 # Durability of all items will be multiplied with this (0.8 means all items will lose 20% durability)
   disable_for_pvp_deaths: false # Skip decreasing item durability for pvp deaths
   disable_for_non_pvp_deaths: false # Skip decreasing item durability for all death causes except pvp
+
+#
+# Protect item entities from being destroyed by various damage causes
+#
+protect_items:
+  enabled: false
+  lightning: true
+  fire: true
+  soul_fire: true
+  lava: true
+  cactus: true
+  explosion: true
+  void: false
+
 respawn_health: 20 # The amount of half hearts players have after they respawn
 respawn_food_level: 20 # The amount of half hunger points players have after they respawn
 #
