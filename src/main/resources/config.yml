@@ -48,6 +48,7 @@ remove_inventory_on_death:
     - DRAGON_EGG
   disable_for_pvp_deaths: false # Skip removing items logic for pvp deaths
   disable_for_non_pvp_deaths: false # Skip removing items logic for all death causes except pvp
+  glowing_drops: false # Whether items dropped should have a glowing effect
 remove_equipment_on_death:
   enabled: false
   chance_per_slot: 0.3 # Chance that an equipment inventory slot is affected (1.0 to affect every slot)
@@ -59,6 +60,7 @@ remove_equipment_on_death:
   drop_on_ground: true # Whether the equipment should only be removed or also drop on the ground
   disable_for_pvp_deaths: false # Skip removing equipment logic for pvp deaths
   disable_for_non_pvp_deaths: false # Skip removing equipment logic for all death causes except pvp
+  glowing_drops: false # Whether items dropped should have a glowing effect
 decrease_item_durability_on_death:
   enabled: false
   multiplier: 0.8 # Durability of all items will be multiplied with this (0.8 means all items will lose 20% durability)

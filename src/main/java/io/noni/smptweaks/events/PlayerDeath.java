@@ -113,6 +113,7 @@ public class PlayerDeath implements Listener {
             var minAffectedStackSize = SMPtweaks.getCfg().getBoolean("remove_inventory_on_death.include_non_stackable_items") ? 0 : 1;
             var inventoryDropOnGround = SMPtweaks.getCfg().getBoolean("remove_inventory_on_death.drop_on_ground");
             var inventoryDropMultiplier = SMPtweaks.getCfg().getDouble("remove_inventory_on_death.drop_amount_multiplier");
+            var inventoryGlowingDrops = SMPtweaks.getCfg().getBoolean("remove_inventory_on_death.glowing_drops", false);
 
             for (ItemStack itemStack : player.getInventory().getStorageContents()) {
                 if (itemStack == null) {
@@ -128,7 +129,10 @@ public class PlayerDeath implements Listener {
                 // Always drop item if it's listed
                 List<Material> materialsToAlwaysDrop = SMPtweaks.getConfigCache().getAlwaysDropMaterials();
                 if (inventoryDropOnGround && materialsToAlwaysDrop.contains(itemStack.getType())) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), itemStack);
+                    var droppedItem = player.getWorld().dropItemNaturally(player.getLocation(), itemStack);
+                    if (inventoryGlowingDrops && droppedItem != null) {
+                        droppedItem.setGlowing(true);
+                    }
                     player.getInventory().remove(itemStack);
                     lostItems = true;
                     continue;
@@ -154,7 +158,10 @@ public class PlayerDeath implements Listener {
                             itemStackToDrop.setAmount(amountToDrop);
 
                             if(inventoryDropOnGround && !itemStack.getType().isAir() && amountToDrop > 0) {
-                                player.getWorld().dropItemNaturally(player.getLocation(), itemStackToDrop);
+                                var droppedItem = player.getWorld().dropItemNaturally(player.getLocation(), itemStackToDrop);
+                                if (inventoryGlowingDrops && droppedItem != null) {
+                                    droppedItem.setGlowing(true);
+                                }
                             }
                             lostItems = true;
                         }
@@ -173,6 +180,7 @@ public class PlayerDeath implements Listener {
         ) {
             var equipmentChancePerSlot = SMPtweaks.getCfg().getDouble("remove_equipment_on_death.chance_per_slot");
             var equipmentDropOnGround = SMPtweaks.getCfg().getBoolean("remove_equipment_on_death.drop_on_ground");
+            var equipmentGlowingDrops = SMPtweaks.getCfg().getBoolean("remove_equipment_on_death.glowing_drops", false);
 
             // Helmet
             if(SMPtweaks.getCfg().getBoolean("remove_equipment_on_death.include_helmet", true)) {
@@ -180,7 +188,10 @@ public class PlayerDeath implements Listener {
                 if(helmet != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
                     player.getInventory().setHelmet(null);
                     if(equipmentDropOnGround) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), helmet);
+                        var droppedItem = player.getWorld().dropItemNaturally(player.getLocation(), helmet);
+                        if (equipmentGlowingDrops && droppedItem != null) {
+                            droppedItem.setGlowing(true);
+                        }
                     }
                     lostItems = true;
                 }
@@ -192,7 +203,10 @@ public class PlayerDeath implements Listener {
                 if(chestplate != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
                     player.getInventory().setChestplate(null);
                     if(equipmentDropOnGround) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), chestplate);
+                        var droppedItem = player.getWorld().dropItemNaturally(player.getLocation(), chestplate);
+                        if (equipmentGlowingDrops && droppedItem != null) {
+                            droppedItem.setGlowing(true);
+                        }
                     }
                     lostItems = true;
                 }
@@ -204,7 +218,10 @@ public class PlayerDeath implements Listener {
                 if(leggings != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
                     player.getInventory().setLeggings(null);
                     if(equipmentDropOnGround) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), leggings);
+                        var droppedItem = player.getWorld().dropItemNaturally(player.getLocation(), leggings);
+                        if (equipmentGlowingDrops && droppedItem != null) {
+                            droppedItem.setGlowing(true);
+                        }
                     }
                     lostItems = true;
                 }
@@ -216,7 +233,10 @@ public class PlayerDeath implements Listener {
                 if(boots != null && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
                     player.getInventory().setBoots(null);
                     if(equipmentDropOnGround) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), boots);
+                        var droppedItem = player.getWorld().dropItemNaturally(player.getLocation(), boots);
+                        if (equipmentGlowingDrops && droppedItem != null) {
+                            droppedItem.setGlowing(true);
+                        }
                     }
                     lostItems = true;
                 }
@@ -228,7 +248,10 @@ public class PlayerDeath implements Listener {
                 if(offhand != null && offhand.getType() != Material.AIR && ThreadLocalRandom.current().nextFloat() < equipmentChancePerSlot) {
                     player.getInventory().setItemInOffHand(null);
                     if(equipmentDropOnGround) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), offhand);
+                        var droppedItem = player.getWorld().dropItemNaturally(player.getLocation(), offhand);
+                        if (equipmentGlowingDrops && droppedItem != null) {
+                            droppedItem.setGlowing(true);
+                        }
                     }
                     lostItems = true;
                 }
