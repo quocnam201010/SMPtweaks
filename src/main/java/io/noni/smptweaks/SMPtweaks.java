@@ -186,8 +186,10 @@ public final class SMPtweaks extends JavaPlugin {
 
             config.getBoolean("fun_fishing.enabled") ||
             config.getBoolean("lava_fishing.enabled") ||
+            config.getBoolean("loot_injection.enabled") ||
             config.getConfigurationSection("fun_fishing.dimensions") != null ||
-            config.getConfigurationSection("lava_fishing.dimensions") != null
+            config.getConfigurationSection("lava_fishing.dimensions") != null ||
+            config.getConfigurationSection("loot_injection.dimensions") != null
                     ? new PlayerFish() : null,
 
             config.getBoolean("disable_trading.enabled")

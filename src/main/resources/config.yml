@@ -379,4 +379,23 @@ lava_fishing:
   #   world_nether:
   #     enabled: true
 
+#
+# Loot Injection
+# Allows players to catch custom items alongside vanilla catches.
+# Incompatible with fun fishing.
+#
+loot_injection:
+  enabled: false
+  items:
+    - netherite_scrap 1 0.05
+    - gold_nugget 2-5 0.2
+  # Per-dimension overrides. Unlisted dimensions fall back to the global settings above.
+  # dimensions:
+  #   world_nether:
+  #     enabled: true
+  #     items:
+  #       - blaze_rod 1 0.1
+  #       - netherite_scrap 1 0.1
+
+
 

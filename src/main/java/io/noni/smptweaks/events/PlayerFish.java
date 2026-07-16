@@ -52,6 +52,10 @@ public class PlayerFish implements Listener {
         if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH) {
             if (isFunFishingEnabled(world)) {
                 handleWaterCatch(event);
+            } else {
+                if (isLootInjectionEnabled(world)) {
+                    processLootInjection(player, world, player.getLocation());
+                }
             }
             return;
         }
@@ -581,6 +585,11 @@ public class PlayerFish implements Listener {
                     }
                 }
             }
+
+            // Process loot injection if enabled
+            if (isLootInjectionEnabled(world)) {
+                processLootInjection(player, world, player.getLocation());
+            }
         }
     }
 
@@ -692,5 +701,83 @@ public class PlayerFish implements Listener {
             return SMPtweaks.getCfg().getBoolean(path);
         }
         return SMPtweaks.getCfg().getBoolean("lava_fishing.enabled", false);
+    }
+
+    private boolean isLootInjectionEnabled(World world) {
+        String worldName = world.getName();
+        String path = "loot_injection.dimensions." + worldName + ".enabled";
+        if (SMPtweaks.getCfg().contains(path)) {
+            return SMPtweaks.getCfg().getBoolean(path);
+        }
+        return SMPtweaks.getCfg().getBoolean("loot_injection.enabled", false);
+    }
+
+    private java.util.List<String> getInjectedItemsList(World world) {
+        String worldName = world.getName();
+        String path = "loot_injection.dimensions." + worldName + ".items";
+        if (SMPtweaks.getCfg().contains(path)) {
+            return SMPtweaks.getCfg().getStringList(path);
+        }
+        return SMPtweaks.getCfg().getStringList("loot_injection.items");
+    }
+
+    private void processLootInjection(Player player, World world, Location loc) {
+        java.util.List<String> itemConfigLines = getInjectedItemsList(world);
+        if (itemConfigLines == null || itemConfigLines.isEmpty()) {
+            return;
+        }
+
+        java.util.List<ItemStack> injectedLoot = new java.util.ArrayList<>();
+        for (String itemLine : itemConfigLines) {
+            try {
+                String[] parts = itemLine.trim().split("\\s+");
+                if (parts.length >= 2) {
+                    Material material = Material.matchMaterial(parts[0].toUpperCase());
+                    if (material == null) continue;
+
+                    int min = 1;
+                    int max = 1;
+                    double chance = 0.0;
+
+                    if (parts.length == 2) {
+                        chance = Double.parseDouble(parts[1]);
+                    } else {
+                        String amountStr = parts[1];
+                        if (amountStr.contains("-")) {
+                            String[] range = amountStr.split("-");
+                            min = Integer.parseInt(range[0]);
+                            max = Integer.parseInt(range[1]);
+                        } else {
+                            min = Integer.parseInt(amountStr);
+                            max = min;
+                        }
+                        chance = Double.parseDouble(parts[2]);
+                    }
+
+                    if (ThreadLocalRandom.current().nextDouble() < chance) {
+                        int amount = min == max ? min : ThreadLocalRandom.current().nextInt(min, max + 1);
+                        if (amount > 0) {
+                            injectedLoot.add(new ItemStack(material, amount));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+
+        if (injectedLoot.isEmpty()) {
+            return;
+        }
+
+        for (ItemStack item : injectedLoot) {
+            java.util.Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+            if (!leftover.isEmpty()) {
+                for (ItemStack leftoverItem : leftover.values()) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), leftoverItem);
+                }
+            }
+            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.5F, 1.5F);
+        }
     }
 }
