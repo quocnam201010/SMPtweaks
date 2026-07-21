@@ -413,5 +413,54 @@ loot_injection:
   #       - blaze_rod 1 0.1
   #       - netherite_scrap 1 0.1
 
+#
+# Piglin Barter Loot Injection
+# Allows custom items to be injected into Piglin bartering.
+# Fired when a Piglin is bartering.
+# Modifies the outcome list of items that the Piglin throws back to the player.
+#
+piglin_barter:
+  enabled: false
+  entries:
+    # Example 1: Coordinate conditions with simple string item format (quantity or range)
+    overworld_positive_coords:
+      conditions:
+        - "x > 0"
+        - "z > 0"
+      items:
+        # Syntax: material quantity chance (or material min-max chance)
+        - "iron_nugget 1 0.1"
+        - "gold_nugget 2-5 0.2"
+
+    # Example 2: Structured item map with material, amount, chance
+    underworld_modifier:
+      conditions:
+        - "y <= 64"
+      items:
+        - material: REDSTONE
+          amount: 1
+          chance: 0.15
+        - material: EMERALD
+          amount: 1-3
+          chance: 0.05
+
+    # Example 3: Serialized ItemStack item with custom NBT/metadata (e.g. added via command)
+    custom_special_item:
+      conditions:
+        - "y > 64"
+      items:
+        - item:
+            ==: org.bukkit.inventory.ItemStack
+            v: 3463
+            type: GOLDEN_APPLE
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: '{"text":"Holy Apple"}'
+              lore:
+                - '{"text":"A rare gift from piglins"}'
+          chance: 0.02
+
+
 
 

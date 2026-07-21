@@ -198,6 +198,9 @@ public final class SMPtweaks extends JavaPlugin {
             config.getBoolean("protect_items.enabled")
                     ? new ItemDamage() : null,
 
+            config.getBoolean("piglin_barter.enabled")
+                    ? new PiglinBarter() : null,
+
             new RecipeMenuListener()
         ).forEach(this::registerEvent);
 

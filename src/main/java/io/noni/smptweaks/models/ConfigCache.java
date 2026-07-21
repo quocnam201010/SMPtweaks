@@ -31,6 +31,8 @@ public class ConfigCache {
     private final List<ShapelessRecipe> shapelessRecipes = new ArrayList<>();
     private final EnumMap<EntityType, Float> entitySpawnRates = new EnumMap<>(EntityType.class);
     private final EnumMap<EntityType, CustomDropSet> entityCustomDrops = new EnumMap<>(EntityType.class);
+    private boolean piglinBarterEnabled;
+    private final List<PiglinBarterEntry> piglinBarterEntries = new ArrayList<>();
 
     private boolean protectItemsEnabled;
     private boolean protectItemsLightning;
@@ -369,6 +371,43 @@ public class ConfigCache {
             }
             entityCustomDrops.put(entityType, new CustomDropSet(xpDrop, drops, configCommands, discardVanillaDrops));
         }
+
+        //
+        // Piglin Barter Loot Injection
+        //
+        piglinBarterEnabled = SMPtweaks.getCfg().getBoolean("piglin_barter.enabled", false);
+        if (piglinBarterEnabled) {
+            org.bukkit.configuration.ConfigurationSection section = SMPtweaks.getCfg().getConfigurationSection("piglin_barter.entries");
+            if (section != null) {
+                for (String key : section.getKeys(false)) {
+                    org.bukkit.configuration.ConfigurationSection entrySec = section.getConfigurationSection(key);
+                    if (entrySec != null) {
+                        List<String> condStrings = entrySec.getStringList("conditions");
+                        List<CoordinateCondition> conditions = new ArrayList<>();
+                        for (String condStr : condStrings) {
+                            CoordinateCondition cond = CoordinateCondition.parse(condStr);
+                            if (cond != null) {
+                                conditions.add(cond);
+                            } else {
+                                LoggingUtils.warn("Invalid coordinate condition '" + condStr + "' in piglin barter entry '" + key + "'");
+                            }
+                        }
+
+                        List<PiglinBarterModifierItem> items = new ArrayList<>();
+                        List<?> configItems = entrySec.getList("items");
+                        if (configItems != null) {
+                            for (Object obj : configItems) {
+                                PiglinBarterModifierItem item = parsePiglinBarterItem(obj, key);
+                                if (item != null) {
+                                    items.add(item);
+                                }
+                            }
+                        }
+                        piglinBarterEntries.add(new PiglinBarterEntry(key, conditions, items));
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -643,5 +682,116 @@ public class ConfigCache {
 
     public boolean isProtectItemsVoid() {
         return protectItemsVoid;
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    private PiglinBarterModifierItem parsePiglinBarterItem(Object obj, String entryName) {
+        if (obj == null) return null;
+
+        if (obj instanceof String itemLine) {
+            try {
+                String[] parts = itemLine.trim().split("\\s+");
+                if (parts.length >= 2) {
+                    Material material = Material.matchMaterial(parts[0].toUpperCase());
+                    if (material == null) {
+                        LoggingUtils.warn("Invalid material '" + parts[0] + "' in piglin barter entry '" + entryName + "'");
+                        return null;
+                    }
+
+                    int min = 1;
+                    int max = 1;
+                    double chance = 0.0;
+
+                    if (parts.length == 2) {
+                        chance = Double.parseDouble(parts[1]);
+                    } else {
+                        String amountStr = parts[1];
+                        if (amountStr.contains("-")) {
+                            String[] range = amountStr.split("-");
+                            min = Integer.parseInt(range[0]);
+                            max = Integer.parseInt(range[1]);
+                        } else {
+                            min = Integer.parseInt(amountStr);
+                            max = min;
+                        }
+                        chance = Double.parseDouble(parts[2]);
+                    }
+                    
+                    ItemStack itemStack = new ItemStack(material, min);
+                    return new PiglinBarterModifierItem(itemStack, min, max, chance);
+                }
+            } catch (Exception e) {
+                LoggingUtils.warn("Error parsing item string '" + itemLine + "' in piglin barter entry '" + entryName + "'");
+            }
+        } else if (obj instanceof Map<?, ?> map) {
+            try {
+                ItemStack itemStack = null;
+                double chance = 0.1;
+                int min = 1;
+                int max = 1;
+
+                if (map.containsKey("chance")) {
+                    chance = Double.parseDouble(map.get("chance").toString());
+                }
+
+                if (map.containsKey("item")) {
+                    Object itemObj = map.get("item");
+                    if (itemObj instanceof ItemStack stack) {
+                        itemStack = stack;
+                    } else if (itemObj instanceof Map<?, ?> itemMap) {
+                        itemStack = ItemStack.deserialize((Map<String, Object>) itemMap);
+                    }
+                }
+
+                if (itemStack == null && map.containsKey("material")) {
+                    Material material = Material.matchMaterial(map.get("material").toString().toUpperCase());
+                    if (material != null) {
+                        int amount = 1;
+                        if (map.containsKey("amount")) {
+                            String amountStr = map.get("amount").toString();
+                            if (amountStr.contains("-")) {
+                                amount = Integer.parseInt(amountStr.split("-")[0]);
+                            } else {
+                                amount = Integer.parseInt(amountStr);
+                            }
+                        }
+                        itemStack = new ItemStack(material, amount);
+                    }
+                }
+
+                if (itemStack == null) {
+                    LoggingUtils.warn("No valid item specified in piglin barter entry '" + entryName + "'");
+                    return null;
+                }
+
+                min = itemStack.getAmount();
+                max = itemStack.getAmount();
+                if (map.containsKey("amount")) {
+                    String amountStr = map.get("amount").toString();
+                    if (amountStr.contains("-")) {
+                        String[] range = amountStr.split("-");
+                        min = Integer.parseInt(range[0]);
+                        max = Integer.parseInt(range[1]);
+                    } else {
+                        min = Integer.parseInt(amountStr);
+                        max = min;
+                    }
+                }
+
+                return new PiglinBarterModifierItem(itemStack, min, max, chance);
+            } catch (Exception e) {
+                LoggingUtils.warn("Error parsing item map in piglin barter entry '" + entryName + "': " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    public boolean isPiglinBarterEnabled() {
+        return piglinBarterEnabled;
+    }
+
+    public List<PiglinBarterEntry> getPiglinBarterEntries() {
+        return piglinBarterEntries;
     }
 }
